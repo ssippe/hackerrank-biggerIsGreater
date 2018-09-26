@@ -32,6 +32,21 @@ namespace UnitTestProject1
         }
 
         [TestMethod]
+        public void GetN2()
+        {
+            Main.GetStringN2("abc", 0).ShouldBe("abc");
+            Main.GetStringN2("abc", 5).ShouldBe("cba");
+            Main.GetStringN2("abc", 4).ShouldBe("cab");
+            Main.GetStringN2("abcd", 23).ShouldBe("dcba");
+            Main.GetStringN2("abcd", 0).ShouldBe("abcd");
+            Main.GetStringN2("abcd", 1).ShouldBe("abdc");
+
+
+        }
+
+
+
+        [TestMethod]
         public void NextString()
         {
             Main.NextString("abc").ShouldBe("acb");
@@ -132,6 +147,37 @@ namespace UnitTestProject1
             Main.GetIdx("acb").ShouldBe(new List<int> { 0, 1, 0 });
             Main.GetIdx("cab").ShouldBe(new List<int> { 2, 0, 0 });
             //Main.GetN("cba").ShouldBe(5);            
+        }
+
+        [TestMethod]
+        public void GetScoreHelper()
+        {
+            Main.GetScoreHelper(3,3).ShouldBe(18);
+            Main.GetScoreHelper(2,2).ShouldBe(4);
+        }
+
+        [TestMethod]
+        public void GetScore()
+        {
+            Main.GetScore("cba").ShouldBe(5);
+            Main.GetScore("dcba").ShouldBe(23);
+            Main.GetScore("dcab").ShouldBe(22);
+            Main.GetScore("abdc").ShouldBe(1);
+            Main.GetScore("abc").ShouldBe(0);
+            
+            Main.GetScore("ab").ShouldBe(0);
+            Main.GetScore("ba").ShouldBe(1);
+            Main.GetScore("abcd").ShouldBe(0);
+            Main.GetScore("ocsmerkgidvddsazqxjbqlrrxcotrnfvtnlutlfcafdlwiismslaytqdbvlmcpapfbmzxmftrkkqvkpflxpezzapllerxyzlcf").ShouldBe(7593789072679204070L);
+            
+
+
+        }
+
+        [TestMethod]
+        public void Bitshift()
+        {
+            (1 << 2).ShouldBe(4);
         }
 
         [TestMethod]
