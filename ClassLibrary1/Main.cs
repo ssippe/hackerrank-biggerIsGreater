@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace ClassLibrary1
 {
@@ -40,28 +41,28 @@ namespace ClassLibrary1
            
         }
 
-        public static long GetScoreHelper(int i, int n)
-        {
-            return (i) * Fact(n);
-        }
+        //public static long GetScoreHelper(int i, int n)
+        //{
+        //    return (i) * Fact(n);
+        //}
 
-        public static long GetScore(string w)
-        {
-            var wOrdered = ToOrdered(w);
-            long sum = 0;
-            for (int i = 0; i < w.Length; i++)
-            {
-                var n = w.Length - 1 - i;
-                var idx = wOrdered.IndexOf(w[i]);
-                wOrdered = DropChar(wOrdered, idx);
-                var iScore = GetScoreHelper(idx, n);
-                Debug.WriteLine(iScore);
-                sum += iScore;
-            }
-            return sum;
-        }
+        //public static long GetScore(string w)
+        //{
+        //    var wOrdered = ToOrdered(w);
+        //    long sum = 0;
+        //    for (int i = 0; i < w.Length; i++)
+        //    {
+        //        var n = w.Length - 1 - i;
+        //        var idx = wOrdered.IndexOf(w[i]);
+        //        wOrdered = DropChar(wOrdered, idx);
+        //        var iScore = GetScoreHelper(idx, n);
+        //        Debug.WriteLine(iScore);
+        //        sum += iScore;
+        //    }
+        //    return sum;
+        //}
 
-        public static int[] GetIdx(string w)
+        public static int[] GetScore(string w)
         {
             var idx = new Queue<int>();
             var wOrdered = ToOrdered(w);
@@ -121,6 +122,8 @@ namespace ClassLibrary1
 
         public static string GetStringN(string w, int[] idx)
         {
+            if (idx == null)
+                return null;
             var wRem = ToOrdered(w);
             string result = "";
             while (wRem.Length > 0)
@@ -158,16 +161,17 @@ namespace ClassLibrary1
         {
             var stopWatch = Stopwatch.StartNew();
             var score = GetScore(w);
-            Debug.WriteLine("after getidx " + stopWatch.Elapsed);
+            //Debug.WriteLine("after getidx " + stopWatch.Elapsed);
             while(true)
             {
-                score += 1;
-                Debug.WriteLine("after addone" + stopWatch.Elapsed);
-                
-                var next = GetStringN2(w, score);
+                score = AddOne(score);
+                //Debug.WriteLine("after addone" + stopWatch.Elapsed);
+                Debug.WriteLine("score" + JsonConvert.SerializeObject(score));
+
+                var next = GetStringN(w, score);
                 if (next == null)
                     return "no answer";
-                Debug.WriteLine("after getstringn" + stopWatch.Elapsed);
+                //Debug.WriteLine("after getstringn" + stopWatch.Elapsed);
                 if (next != w)
                     return next;
             } 

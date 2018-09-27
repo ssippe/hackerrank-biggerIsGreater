@@ -44,7 +44,17 @@ namespace UnitTestProject1
 
         }
 
+        [TestMethod]
+        public void NextStringRepeat()
+        {
+            var s = "abbb";
+            do
+            {
+                s = Main.NextString(s);
+                Debug.WriteLine(s);
+            } while (s != "no answer");
 
+        }
 
         [TestMethod]
         public void NextString()
@@ -59,6 +69,8 @@ namespace UnitTestProject1
             Main.NextString("hefg").ShouldBe("hegf");
             Main.NextString("dhck").ShouldBe("dhkc");
             Main.NextString("dkhc").ShouldBe("hcdk");
+            Main.NextString("bbba").ShouldBe("no answer");
+            
 
 
 
@@ -140,39 +152,39 @@ namespace UnitTestProject1
         }
 
         [TestMethod]
-        public void GetIdx()
+        public void GetScore()
         {
-            Main.GetIdx("abc").ShouldBe(new List<int> { 0, 0, 0 });
-            Main.GetIdx("cba").ShouldBe(new List<int> { 2, 1, 0 });
-            Main.GetIdx("acb").ShouldBe(new List<int> { 0, 1, 0 });
-            Main.GetIdx("cab").ShouldBe(new List<int> { 2, 0, 0 });
+            Main.GetScore("abc").ShouldBe(new List<int> { 0, 0, 0 });
+            Main.GetScore("cba").ShouldBe(new List<int> { 2, 1, 0 });
+            Main.GetScore("acb").ShouldBe(new List<int> { 0, 1, 0 });
+            Main.GetScore("cab").ShouldBe(new List<int> { 2, 0, 0 });
             //Main.GetN("cba").ShouldBe(5);            
         }
 
-        [TestMethod]
-        public void GetScoreHelper()
-        {
-            Main.GetScoreHelper(3,3).ShouldBe(18);
-            Main.GetScoreHelper(2,2).ShouldBe(4);
-        }
+        //[TestMethod]
+        //public void GetScoreHelper()
+        //{
+        //    Main.GetScoreHelper(3,3).ShouldBe(18);
+        //    Main.GetScoreHelper(2,2).ShouldBe(4);
+        //}
 
-        [TestMethod]
-        public void GetScore()
-        {
-            Main.GetScore("cba").ShouldBe(5);
-            Main.GetScore("dcba").ShouldBe(23);
-            Main.GetScore("dcab").ShouldBe(22);
-            Main.GetScore("abdc").ShouldBe(1);
-            Main.GetScore("abc").ShouldBe(0);
+        //[TestMethod]
+        //public void GetScore()
+        //{
+        //    Main.GetScore("cba").ShouldBe(5);
+        //    Main.GetScore("dcba").ShouldBe(23);
+        //    Main.GetScore("dcab").ShouldBe(22);
+        //    Main.GetScore("abdc").ShouldBe(1);
+        //    Main.GetScore("abc").ShouldBe(0);
             
-            Main.GetScore("ab").ShouldBe(0);
-            Main.GetScore("ba").ShouldBe(1);
-            Main.GetScore("abcd").ShouldBe(0);
-            Main.GetScore("ocsmerkgidvddsazqxjbqlrrxcotrnfvtnlutlfcafdlwiismslaytqdbvlmcpapfbmzxmftrkkqvkpflxpezzapllerxyzlcf").ShouldBe(7593789072679204070L);
+        //    Main.GetScore("ab").ShouldBe(0);
+        //    Main.GetScore("ba").ShouldBe(1);
+        //    Main.GetScore("abcd").ShouldBe(0);
+        //    Main.GetScore("ocsmerkgidvddsazqxjbqlrrxcotrnfvtnlutlfcafdlwiismslaytqdbvlmcpapfbmzxmftrkkqvkpflxpezzapllerxyzlcf").ShouldBe(7593789072679204070L);
             
 
 
-        }
+        //}
 
         [TestMethod]
         public void Bitshift()
