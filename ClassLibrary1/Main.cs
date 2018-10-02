@@ -62,19 +62,19 @@ namespace ClassLibrary1
         //    return sum;
         //}
 
-        public static int[] GetScore(string w)
-        {
-            var idx = new Queue<int>();
-            var wOrdered = ToOrdered(w);
-            var wRem = new Queue<char>(w);
+        //public static int[] GetScore(string w)
+        //{
+        //    var idx = new Queue<int>();
+        //    var wOrdered = ToOrdered(w);
+        //    var wRem = new Queue<char>(w);
 
-            while (wRem.Count > 0)
-            {
-                idx.Enqueue(GetOrderedIndex(new string(wRem.ToArray()), wRem.Peek()));
-                wRem.Dequeue();
-            }
-            return idx.ToArray();
-        }
+        //    while (wRem.Count > 0)
+        //    {
+        //        idx.Enqueue(GetOrderedIndex(new string(wRem.ToArray()), wRem.Peek()));
+        //        wRem.Dequeue();
+        //    }
+        //    return idx.ToArray();
+        //}
 
         public static int[] AddOne(int[] idx)
         {
@@ -136,26 +136,26 @@ namespace ClassLibrary1
             return result;
         }
 
-        public static string GetStringN2(string w, long n)
-        {
-            var wOrdered = ToOrdered(w);
-            var result = new char[w.Length];
-            long nRem = n;
-            for (int i = 0; i < w.Length; i++)
-            {
-                var divisorAtI = Fact(w.Length - i - 1);
-                var idxAtI =(int) (nRem / divisorAtI);
-                if (idxAtI > wOrdered.Length - 1)
-                {
-                    return null;
-                }
-                result[i] = wOrdered[idxAtI];
-                nRem -= idxAtI * divisorAtI;
-                wOrdered = DropChar(wOrdered, idxAtI);
-            }
+        //public static string GetStringN2(string w, long n)
+        //{
+        //    var wOrdered = ToOrdered(w);
+        //    var result = new char[w.Length];
+        //    long nRem = n;
+        //    for (int i = 0; i < w.Length; i++)
+        //    {
+        //        var divisorAtI = Fact(w.Length - i - 1);
+        //        var idxAtI =(int) (nRem / divisorAtI);
+        //        if (idxAtI > wOrdered.Length - 1)
+        //        {
+        //            return null;
+        //        }
+        //        result[i] = wOrdered[idxAtI];
+        //        nRem -= idxAtI * divisorAtI;
+        //        wOrdered = DropChar(wOrdered, idxAtI);
+        //    }
 
-            return new string(result);            
-        }
+        //    return new string(result);            
+        //}
 
         public static string NextString(string w)
         {

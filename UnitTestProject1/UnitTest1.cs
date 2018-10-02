@@ -31,18 +31,18 @@ namespace UnitTestProject1
 
         }
 
-        [TestMethod]
-        public void GetN2()
-        {
-            Main.GetStringN2("abc", 0).ShouldBe("abc");
-            Main.GetStringN2("abc", 5).ShouldBe("cba");
-            Main.GetStringN2("abc", 4).ShouldBe("cab");
-            Main.GetStringN2("abcd", 23).ShouldBe("dcba");
-            Main.GetStringN2("abcd", 0).ShouldBe("abcd");
-            Main.GetStringN2("abcd", 1).ShouldBe("abdc");
+        //[TestMethod]
+        //public void GetN2()
+        //{
+        //    Main.GetStringN2("abc", 0).ShouldBe("abc");
+        //    Main.GetStringN2("abc", 5).ShouldBe("cba");
+        //    Main.GetStringN2("abc", 4).ShouldBe("cab");
+        //    Main.GetStringN2("abcd", 23).ShouldBe("dcba");
+        //    Main.GetStringN2("abcd", 0).ShouldBe("abcd");
+        //    Main.GetStringN2("abcd", 1).ShouldBe("abdc");
 
 
-        }
+        //}
 
         [TestMethod]
         public void NextStringRepeat()
