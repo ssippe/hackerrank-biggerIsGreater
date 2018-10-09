@@ -23,68 +23,7 @@ namespace compare_the_triplets
             Nw
         }
 
-        static Point NextPoint(Point p, Direction d, int stepCount)
-        {
-            int dR = 0;
-            int dC = 0;
-            switch (d)
-            {
-                case Direction.N:
-                    dR = +stepCount;
-                    break;
-                case Direction.S:
-                    dR = -stepCount;
-                    break;
-                case Direction.E:
-                    dC = +stepCount;
-                    break;
-                case Direction.W:
-                    dC = -stepCount;
-                    break;
-                case Direction.Ne:
-                    dR = +stepCount;
-                    dC = +stepCount;
-                    break;
-                case Direction.Se:
-                    dR = -stepCount;
-                    dC = +stepCount;
-                    break;
-                case Direction.Sw:
-                    dR = -stepCount;
-                    dC = -stepCount;
-                    break;
-                case Direction.Nw:
-                    dR = +stepCount;
-                    dC = -stepCount;
-                    break;
-            }
-            return new Point {C = p.C + dC, R = p.R + dR};
-        }
-
-        static bool CanMove(Direction d, Point queenPoint, int n, int stepCount, Point[] obstacles)
-        {
-            var nextPoint = NextPoint(queenPoint, d, stepCount);
-            if (!nextPoint.IsValid(n))
-                return false;
-
-            if (obstacles.Any(f => nextPoint.Eq(f)))
-                return false;
-            return true;
-        }
-
-        static int DirCount(Direction d, Point queenPoint, int n, Point[] obstacles)
-        {
-
-            int stepCount = 0;
-            while (CanMove(d, queenPoint, n, stepCount + 1, obstacles))
-            {
-                stepCount += 1;
-            }       
-            return stepCount;
-        }
-
-
-
+               
         static int queensAttack(Input input)
         {
 
@@ -105,13 +44,7 @@ namespace compare_the_triplets
                 R = ps[0];
                 C = ps[1];
             }
-
-            public bool IsValid(int boardSize)
-            {
-                return R > 0 && C > 0 && R <= boardSize && C <= boardSize;
-            }
-
-            public bool Eq(Point p) => R == p.R && C == p.C;
+            
             public int Steps(Point p) => Math.Max(Math.Abs(R - p.R), Math.Abs(C - p.C));
             public override string ToString()
             {
