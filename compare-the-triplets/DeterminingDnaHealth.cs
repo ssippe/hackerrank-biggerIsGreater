@@ -41,6 +41,7 @@ namespace compare_the_triplets
             }
 
             // iteration #1 3.5s per 100
+            // iteration #2 1.8s per 100
 
             static Input From(Func<string> newLineFunc)
             {
@@ -84,15 +85,16 @@ namespace compare_the_triplets
                 int last = int.Parse(splits[1]);
                 var dna = splits[2];
                 var genes2 = Genes.Skip(first).Take(last - first + 1).ToList();
+                var heath2 = HeathVals.Skip(first).Take(last - first + 1).ToList();
+                var healthDict = genes2.Select((gene, idx) => new {gene, idx}).GroupBy(f => f.gene)
+                    .ToDictionary(k => k.Key, v => v.Select(g => heath2[g.idx]).Sum());
                 int healthSum = 0;
                 for (int i = 0; i < dna.Length; i++)
                 {
                     var gene = GetNextGene(i, dna, genes2);
                     if (gene == null) 
-                        continue;
-                    var geneIdxs = genes2.Select((f, idx) => new {f, idx}).Where(f => f.f == gene).Select(f => f.idx)
-                        .ToList();
-                    var healthSumLocal = geneIdxs.Select(idx => HeathVals[first + idx]).Sum();
+                        continue;                    
+                    var healthSumLocal = healthDict[gene];
                     healthSum += healthSumLocal;
                 }
                 return healthSum;
