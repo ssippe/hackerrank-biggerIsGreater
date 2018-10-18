@@ -10,6 +10,9 @@ namespace compare_the_triplets
 {
     public class DeterminingDnaHealth
     {
+        //store the longest gene so we know when to stop. there could be 1 really long gene?
+        //linked list store a->aa->aab->aaba etc.
+        //tree of gene values for binary seach 
         public static string GetNextGene(int idx, string dna, IReadOnlyList<string> genes)
         {
             var remainingDna = dna.Substring(idx);
@@ -43,7 +46,7 @@ namespace compare_the_triplets
             // iteration #1 3.5s per 100
             // iteration #2 1.8s per 100
 
-            static Input From(Func<string> newLineFunc)
+            public static Input From(Func<string> newLineFunc)
             {
                 var stopWatch = Stopwatch.StartNew();
                 int si = 0;
@@ -80,6 +83,7 @@ namespace compare_the_triplets
 
             int ProcessDnaLine(string s)
             {
+                var sw = Stopwatch.StartNew();
                 var splits = s.Split(' ');
                 int first = int.Parse(splits[0]);
                 int last = int.Parse(splits[1]);
@@ -89,6 +93,7 @@ namespace compare_the_triplets
                 var healthDict = genes2.Select((gene, idx) => new {gene, idx}).GroupBy(f => f.gene)
                     .ToDictionary(k => k.Key, v => v.Select(g => heath2[g.idx]).Sum());
                 int healthSum = 0;
+                var t0 = sw.Elapsed;
                 for (int i = 0; i < dna.Length; i++)
                 {
                     var gene = GetNextGene(i, dna, genes2);
@@ -97,6 +102,10 @@ namespace compare_the_triplets
                     var healthSumLocal = healthDict[gene];
                     healthSum += healthSumLocal;
                 }
+
+                var t1 = sw.Elapsed - t0;
+                var totalTicks = sw.ElapsedTicks;
+                Debug.WriteLine($"PDL t0/1 = {(double)t0.Ticks/totalTicks:0.00}/{(double)t1.Ticks/totalTicks:0.00}");
                 return healthSum;
             }
             
@@ -124,9 +133,9 @@ a b c aa d b
         [Fact]
         public void DeterminingDnaHealthTest2()
         {
-            var inputStr = new StreamReader(this.GetType().Assembly
-                .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In2.txt")).ReadToEnd();
-            Input.FromString(inputStr).ResultToString().ShouldBe("15806635 20688978289");
+            var sr = new StreamReader(this.GetType().Assembly
+                .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In2.txt"));
+            Input.From(() => sr.ReadLine()).ResultToString().ShouldBe("15806635 20688978289");
         }
     }
 }
