@@ -9,9 +9,11 @@
 
   <ItemGroup>
     <None Remove="DeterminingDnaHealth.In2.txt" />
+    <None Remove="DeterminingDnaHealth.In8.txt" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DeterminingDnaHealth.In8.txt" />
     <EmbeddedResource Include="DeterminingDnaHealth.In2.txt" />
   </ItemGroup>
 
