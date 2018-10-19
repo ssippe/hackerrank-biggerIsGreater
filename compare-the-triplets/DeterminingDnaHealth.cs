@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
+using System.Xml;
 using Shouldly;
 using Xunit;
 
@@ -25,10 +26,11 @@ namespace compare_the_triplets
         public class Node
         {
             public string Value;
-            public SortedDictionary<int, int> IdxHealthDict = new SortedDictionary<int, int>();
-            public Dictionary<char, Node> Children = new Dictionary<char, Node>();
+            public Dictionary<int, int> IdxHealthDict;
+            public Dictionary<char, Node> Children;
+            public int Health { get; set; }
         }
-
+        
         public static Node SearchTree(Node node, string searchText, int depth = 0)
         {
             //exact match
@@ -50,7 +52,7 @@ namespace compare_the_triplets
 
         public static Node BuildTree(string[] genes, int[] healthVals)
         {
-            var root = new Node();
+            var root = new Node() {Children = new Dictionary<char, Node>(), IdxHealthDict = new Dictionary<int, int>()};
             for (int i = 0; i < genes.Length; i++)
             {
                 BuildTree2(root, 0, genes[i], healthVals[i], i);
@@ -64,7 +66,7 @@ namespace compare_the_triplets
             var nextChar = gene.Substring(depth, 1)[0];
             if (!node.Children.ContainsKey(nextChar))
             {
-                node.Children.Add(nextChar,new  Node() );
+                node.Children.Add(nextChar,new  Node(){Children = new Dictionary<char, Node>(), IdxHealthDict = new Dictionary<int, int>()} );
             }
             var child = node.Children[nextChar];
             if (depth + 1 == gene.Length)
@@ -105,6 +107,7 @@ namespace compare_the_triplets
             // iteration #1 3.5s per 100
             // iteration #2 1.8s per 100
             // iteration #3 0.1s per 100
+            // iteration #4 0.4s per 100 tree pruning per dna line. slow down.
 
             public static Input From(Func<string> newLineFunc)
             {
@@ -142,13 +145,34 @@ namespace compare_the_triplets
                 return new Input { DnaCount = dnaCount, Genes = genes, HeathVals = heathVals, _root = treeRoot };
             }
 
+            static Node PruneTree(Node node, int first, int last)
+            {
+                //#1 consolidate health dics
+                //#2 remove leaf nodes that don't have healVal>0
+                var children2 = node.Children.Select(kvp =>
+                        new KeyValuePair<char, Node>(kvp.Key, PruneTree(kvp.Value, first, last)))
+                    .Where(f => f.Value != null)
+                    .ToDictionary(k => k.Key, v => v.Value);
+                var heath = node.IdxHealthDict.Where(f => first <= f.Key && f.Key <= last)
+                    .Select(f => f.Value).Sum();
+                if (heath == 0 && !children2.Any())
+                {
+                    return null;
+                }
+
+                var node2 = new Node() {Children = children2, Value = node.Value, Health = heath};
+                return node2;
+            }
+
             long ProcessDnaLine(string s)
             {
                 //var sw = Stopwatch.StartNew();
+                
                 var splits = s.Split(' ');
                 int first = int.Parse(splits[0]);
                 int last = int.Parse(splits[1]);
                 var dna = splits[2];
+                var prunedTree = PruneTree(_root, first, last);
                 long healthSum = 0;
                 //var t0 = sw.Elapsed;
                 for (int i = 0; i < dna.Length; i++)
@@ -156,7 +180,7 @@ namespace compare_the_triplets
                     for (int j = 1; j <= dna.Length - i; j++)
                     {
                         var searchText = dna.Substring(i, j);
-                        var node = SearchTree(_root, searchText);
+                        var node = SearchTree(prunedTree, searchText);
                         if (node == null)
                         {
                             break;
@@ -164,9 +188,7 @@ namespace compare_the_triplets
 
                         if (node.Value == searchText)
                         {
-                            var heath = node.IdxHealthDict.Where(f => first <= f.Key && f.Key <= last)
-                                .Select(f => f.Value).Sum();
-                            healthSum += heath;
+                            healthSum += node.Health;
                         }
                     }
                 }
