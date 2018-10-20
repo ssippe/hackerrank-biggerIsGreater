@@ -25,7 +25,7 @@ namespace compare_the_triplets
         public class Node
         {
             public string Value;
-            public SortedDictionary<int, int> IdxHealthDict = new SortedDictionary<int, int>();
+            public Dictionary<int, int> IdxHealthDict = new Dictionary<int, int>();
             public Dictionary<char, Node> Children = new Dictionary<char, Node>();
         }
 
@@ -105,6 +105,7 @@ namespace compare_the_triplets
             // iteration #1 3.5s per 100
             // iteration #2 1.8s per 100
             // iteration #3 0.1s per 100
+            // iteration #5 0.025s per 100
 
             public static Input From(Func<string> newLineFunc)
             {
