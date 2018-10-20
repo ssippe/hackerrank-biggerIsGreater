@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
 using Shouldly;
 using Xunit;
 
-namespace compare_the_triplets
+namespace compare_the_triplets.DeterminingDnaHealth
 {
     public class DeterminingDnaHealth
     {
@@ -25,8 +23,8 @@ namespace compare_the_triplets
         public class Node
         {
             public string Value;
-            public Dictionary<int, int> IdxHealthDict = new Dictionary<int, int>();
             public Dictionary<char, Node> Children = new Dictionary<char, Node>();
+            public List<int> Idxs = new List<int>();
         }
 
         public static Node SearchTree(Node node, string searchText, int depth = 0)
@@ -53,13 +51,13 @@ namespace compare_the_triplets
             var root = new Node();
             for (int i = 0; i < genes.Length; i++)
             {
-                BuildTree2(root, 0, genes[i], healthVals[i], i);
+                BuildTree2(root, 0, genes[i], i);
             }
 
             return root;
         }
 
-        private static void BuildTree2(Node node, int depth, string gene, int health, int idx)
+        private static void BuildTree2(Node node, int depth, string gene, int idx)
         {
             var nextChar = gene.Substring(depth, 1)[0];
             if (!node.Children.ContainsKey(nextChar))
@@ -70,11 +68,11 @@ namespace compare_the_triplets
             if (depth + 1 == gene.Length)
             {
                 child.Value = gene;
-                child.IdxHealthDict.Add(idx, health);
+                child.Idxs.Add(idx);
                 return;
             }
 
-            BuildTree2(child, depth + 1, gene, health, idx);
+            BuildTree2(child, depth + 1, gene,  idx);
         }
 
         public class Input
@@ -83,7 +81,7 @@ namespace compare_the_triplets
             public IReadOnlyList<int> HeathVals { get; private set; }
             public int DnaCount { get; private set; }
             public long MinHealth { get; private set; } = Int32.MaxValue;
-            public long MaxHeath { get; private set; } = Int32.MinValue;
+            public long MaxHealth { get; private set; } = Int32.MinValue;
             public int DnaProcessedCount { get; private set; }
             private Node _root;
 
@@ -106,6 +104,7 @@ namespace compare_the_triplets
             // iteration #2 1.8s per 100
             // iteration #3 0.1s per 100
             // iteration #5 0.025s per 100
+            // iteration #6 0.01s per 100
 
             public static Input From(Func<string> newLineFunc)
             {
@@ -125,9 +124,12 @@ namespace compare_the_triplets
                         lastTime = stopWatch.Elapsed;
                     }
                     var health = input.ProcessDnaLine(newLineFunc());
-                    input.MaxHeath = Math.Max(health, input.MaxHeath);
+                    input.MaxHealth = Math.Max(health, input.MaxHealth);
                     input.MinHealth = Math.Min(health, input.MinHealth);
                 }
+
+                input.MinHealth = input.MinHealth == int.MaxValue ? input.MaxHealth : input.MinHealth;
+                input.MaxHealth = input.MaxHealth == int.MinValue? input.MinHealth: input.MaxHealth;
                 return input;
             }
 
@@ -165,10 +167,17 @@ namespace compare_the_triplets
 
                         if (node.Value == searchText)
                         {
-                            var heath = node.IdxHealthDict.Where(f => first <= f.Key && f.Key <= last)
-                                .Select(f => f.Value).Sum();
-                            healthSum += heath;
+                            long health = 0;
+                            for (int k = 0; k < node.Idxs.Count; k++)
+                            {
+                                var idx = node.Idxs[k];
+                                if (idx < first || idx > last)
+                                    continue;
+                                health += HeathVals[idx];
+                            }
+                            healthSum += health;
                         }
+
                     }
                 }
 
@@ -178,7 +187,7 @@ namespace compare_the_triplets
                 return healthSum;
             }
 
-            public string ResultToString() => $"{MinHealth} {MaxHeath}";
+            public string ResultToString() => $"{MinHealth} {MaxHealth}";
         }
 
         //static void Main(string[] args)
@@ -208,12 +217,39 @@ a b c aa d b
         }
 
         [Fact]
+        public void DeterminingDnaHealthTest7()
+        {
+            var sr = new StreamReader(this.GetType().Assembly
+                .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In7.txt"));
+            Input.From(() => sr.ReadLine()).ResultToString().ShouldBe("0 7353994");
+        }
+
+
+
+        [Fact]
         public void DeterminingDnaHealthTest8()
         {
             var sr = new StreamReader(this.GetType().Assembly
                 .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In8.txt"));
             Input.From(() => sr.ReadLine()).ResultToString().ShouldBe("0 8652768");
         }
+
+        [Fact]
+        public void DeterminingDnaHealthTest9()
+        {
+            var sr = new StreamReader(this.GetType().Assembly
+                .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In9.txt"));
+            Input.From(() => sr.ReadLine()).ResultToString().ShouldBe("0 9920592");
+        }
+
+        [Fact]
+        public void DeterminingDnaHealthTest30()
+        {
+            var sr = new StreamReader(this.GetType().Assembly
+                .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In30.txt"));
+            Input.From(() => sr.ReadLine()).ResultToString().ShouldBe("12317773616 12317773616");
+        }
+
 
         //[Fact]
         //public void BuildTreeTest()
