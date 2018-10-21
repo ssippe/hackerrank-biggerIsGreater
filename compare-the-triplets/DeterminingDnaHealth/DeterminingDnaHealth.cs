@@ -10,16 +10,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
 {
     public class DeterminingDnaHealth
     {
-        //store the longest gene so we know when to stop. there could be 1 really long gene?
-        //linked list store a->aa->aab->aaba etc.
-        //tree of gene values for binary seach 
-        //prepare dic outside
-        public static string GetNextGene(int idx, string dna, IReadOnlyList<string> genes)
-        {
-            var remainingDna = dna.Substring(idx);
-            return genes.FirstOrDefault(gene => remainingDna.StartsWith(gene));
-        }
-
+        
         public class Node
         {
             public string Value;
@@ -41,7 +32,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 //adding to searchText with not get match
                 return null;
             }
-            var nextChar = searchText.Substring(depth, 1)[0];
+            var nextChar = searchText[depth];
             if (!node.Children.ContainsKey(nextChar)) return null;
             return SearchTree(node.Children[nextChar], searchText, depth+1);
         }
@@ -59,7 +50,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
 
         private static void BuildTree2(Node node, int depth, string gene, int idx)
         {
-            var nextChar = gene.Substring(depth, 1)[0];
+            var nextChar = gene[depth];
             if (!node.Children.ContainsKey(nextChar))
             {
                 node.Children.Add(nextChar,new  Node() );
@@ -77,28 +68,30 @@ namespace compare_the_triplets.DeterminingDnaHealth
 
         public class Input
         {
-            public IReadOnlyList<string> Genes { get; private set; }
-            public IReadOnlyList<int> HeathVals { get; private set; }
-            public int DnaCount { get; private set; }
-            public long MinHealth { get; private set; } = Int32.MaxValue;
-            public long MaxHealth { get; private set; } = Int32.MinValue;
-            public int DnaProcessedCount { get; private set; }
-            private Node _root;
-
-
-
+            public string[] Genes;
+            public int[] HeathVals;
+            public int DnaCount;
+            public long MinHealth = Int32.MaxValue;
+            public long MaxHealth= Int32.MinValue;
+            public Node Root;
+          
             public static Input FromReadLine()
             {
-                return From(() => Console.ReadLine());
+                var input = ReadHeader();
+                for (int i = 0; i < input.DnaCount; i++)
+                {                    
+                    var health = input.ProcessDnaLine(Console.ReadLine());
+                    input.MaxHealth = Math.Max(health, input.MaxHealth);
+                    input.MinHealth = Math.Min(health, input.MinHealth);
+                }
+
+                input.MinHealth = input.MinHealth == int.MaxValue ? input.MaxHealth : input.MinHealth;
+                input.MaxHealth = input.MaxHealth == int.MinValue ? input.MinHealth : input.MaxHealth;
+                return input;
             }
 
 
-            public static Input FromString(string s)
-            {
-                var splits = s.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-                int i = 0;
-                return From(() => splits[i++]);
-            }
+            
 
             // iteration #1 3.5s per 100
             // iteration #2 1.8s per 100
@@ -106,52 +99,25 @@ namespace compare_the_triplets.DeterminingDnaHealth
             // iteration #5 0.025s per 100
             // iteration #6 0.01s per 100
 
-            public static Input From(Func<string> newLineFunc)
+            
+            static Input ReadHeader()
             {
-                var stopWatch = Stopwatch.StartNew();
-                int si = 0;
-                Debug.WriteLine($"{si++} {stopWatch.Elapsed}");
-                var headerLines = new List<string>
-                    {newLineFunc(), newLineFunc(), newLineFunc(), newLineFunc()};
-                var input = ReadHeader(headerLines);
-                Debug.WriteLine($"{si++} {stopWatch.Elapsed}");
-                var lastTime = stopWatch.Elapsed;
-                for (int i = 0; i < input.DnaCount; i++)
-                {
-                    if (i % 100 == 0)
-                    {
-                        Debug.WriteLine($"{si++} {stopWatch.Elapsed} {i}/{input.DnaCount}, {stopWatch.Elapsed - lastTime} per 100");
-                        lastTime = stopWatch.Elapsed;
-                    }
-                    var health = input.ProcessDnaLine(newLineFunc());
-                    input.MaxHealth = Math.Max(health, input.MaxHealth);
-                    input.MinHealth = Math.Min(health, input.MinHealth);
-                }
-
-                input.MinHealth = input.MinHealth == int.MaxValue ? input.MaxHealth : input.MinHealth;
-                input.MaxHealth = input.MaxHealth == int.MinValue? input.MinHealth: input.MaxHealth;
-                return input;
-            }
-
-
-            static Input ReadHeader(List<string> lines)
-            {
-
-                var geneCount = int.Parse(lines[0]);
-                var genes = lines[1].Split(' ');
-                var heathVals = lines[2].Split(' ').Select(int.Parse).ToArray();
-                int dnaCount = int.Parse(lines[3]);
+                var geneCount = Convert.ToInt32(Console.ReadLine());
+                var genes = Console.ReadLine().Split(' ');
+                var heathVals = Array.ConvertAll(Console.ReadLine().Split(' '), healthTemp => Convert.ToInt32(healthTemp));
+                int dnaCount = Convert.ToInt32(Console.ReadLine());
+                
                 var treeRoot = BuildTree(genes, heathVals);
-                return new Input { DnaCount = dnaCount, Genes = genes, HeathVals = heathVals, _root = treeRoot };
+                return new Input { DnaCount = dnaCount, Genes = genes, HeathVals = heathVals, Root = treeRoot };
             }
 
-            long ProcessDnaLine(string s)
+            public long ProcessDnaLine(string s)
             {
                 //var sw = Stopwatch.StartNew();
-                var splits = s.Split(' ');
-                int first = int.Parse(splits[0]);
-                int last = int.Parse(splits[1]);
-                var dna = splits[2];
+                string[] splits = s.Split(' ');
+                long first = long.Parse(splits[0]);
+                long last = long.Parse(splits[1]);
+                string dna = splits[2];
                 long healthSum = 0;
                 //var t0 = sw.Elapsed;
                 for (int i = 0; i < dna.Length; i++)
@@ -159,7 +125,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
                     for (int j = 1; j <= dna.Length - i; j++)
                     {
                         var searchText = dna.Substring(i, j);
-                        var node = SearchTree(_root, searchText);
+                        var node = SearchTree(Root, searchText);
                         if (node == null)
                         {
                             break;
@@ -196,66 +162,6 @@ namespace compare_the_triplets.DeterminingDnaHealth
         //    Console.WriteLine(input.ResultToString());
         //}
 
-        [Fact]
-        public void DeterminingDnaHealthTest0()
-        {
-            Input.FromString(@"6
-a b c aa d b
-1 2 3 4 5 6
-3
-1 5 caaab
-0 4 xyz
-2 4 bcdybc").ResultToString().ShouldBe("0 19");
-        }
 
-        [Fact]
-        public void DeterminingDnaHealthTest2()
-        {
-            var sr = new StreamReader(this.GetType().Assembly
-                .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In2.txt"));
-            Input.From(() => sr.ReadLine()).ResultToString().ShouldBe("15806635 20688978289");
-        }
-
-        [Fact]
-        public void DeterminingDnaHealthTest7()
-        {
-            var sr = new StreamReader(this.GetType().Assembly
-                .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In7.txt"));
-            Input.From(() => sr.ReadLine()).ResultToString().ShouldBe("0 7353994");
-        }
-
-
-
-        [Fact]
-        public void DeterminingDnaHealthTest8()
-        {
-            var sr = new StreamReader(this.GetType().Assembly
-                .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In8.txt"));
-            Input.From(() => sr.ReadLine()).ResultToString().ShouldBe("0 8652768");
-        }
-
-        [Fact]
-        public void DeterminingDnaHealthTest9()
-        {
-            var sr = new StreamReader(this.GetType().Assembly
-                .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In9.txt"));
-            Input.From(() => sr.ReadLine()).ResultToString().ShouldBe("0 9920592");
-        }
-
-        [Fact]
-        public void DeterminingDnaHealthTest30()
-        {
-            var sr = new StreamReader(this.GetType().Assembly
-                .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In30.txt"));
-            Input.From(() => sr.ReadLine()).ResultToString().ShouldBe("12317773616 12317773616");
-        }
-
-
-        //[Fact]
-        //public void BuildTreeTest()
-        //{
-        //    var genes = new[] {"a", "ab", "bab", "bc", "bca", "c", "caa"};
-        //    var root = BuildTree(genes);
-        //}
     }
 }
