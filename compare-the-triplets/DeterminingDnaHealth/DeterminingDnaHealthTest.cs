@@ -112,6 +112,16 @@ a b c aa d b
         }
 
         [Fact]
+        public void DeterminingDnaHealthTest14()
+        {
+            var sr = new StreamReader(this.GetType().Assembly
+                .GetManifestResourceStream(this.GetType(), "DeterminingDnaHealth.In14.txt"));
+            From(() => sr.ReadLine()).ResultToString().ShouldBe("5042937153 8619278502");
+            //min 5,042,937,153
+            //max 8,619,278,502
+        }
+
+        [Fact]
         public void DeterminingDnaHealthTest30()
         {
             var sr = new StreamReader(this.GetType().Assembly

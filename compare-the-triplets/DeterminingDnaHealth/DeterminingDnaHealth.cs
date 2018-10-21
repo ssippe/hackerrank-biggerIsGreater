@@ -14,8 +14,8 @@ namespace compare_the_triplets.DeterminingDnaHealth
         public class Node
         {
             public string Value;
-            public Dictionary<char, Node> Children = new Dictionary<char, Node>();
-            public List<int> Idxs = new List<int>();
+            public Dictionary<char, Node> Children;// = new Dictionary<char, Node>();
+            public List<int> Idxs;// = new List<int>();
         }
 
         public static Node SearchTree(Node node, string searchText, int depth = 0)
@@ -33,7 +33,11 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 return null;
             }
             var nextChar = searchText[depth];
-            if (!node.Children.ContainsKey(nextChar)) return null;
+            if (node.Children == null || !node.Children.ContainsKey(nextChar))
+            {
+                return null;
+            }
+
             return SearchTree(node.Children[nextChar], searchText, depth+1);
         }
 
@@ -51,13 +55,22 @@ namespace compare_the_triplets.DeterminingDnaHealth
         private static void BuildTree2(Node node, int depth, string gene, int idx)
         {
             var nextChar = gene[depth];
-            if (!node.Children.ContainsKey(nextChar))
+            if (node.Children == null)
+            {
+                node.Children = new Dictionary<char, Node>();
+                node.Children.Add(nextChar, new Node());
+            }
+            else if (!node.Children.ContainsKey(nextChar))
             {
                 node.Children.Add(nextChar,new  Node() );
             }
             var child = node.Children[nextChar];
             if (depth + 1 == gene.Length)
             {
+                if (child.Idxs == null)
+                {
+                    child.Idxs=new List<int>();
+                }
                 child.Value = gene;
                 child.Idxs.Add(idx);
                 return;
@@ -71,8 +84,8 @@ namespace compare_the_triplets.DeterminingDnaHealth
             public string[] Genes;
             public int[] HeathVals;
             public int DnaCount;
-            public long MinHealth = Int32.MaxValue;
-            public long MaxHealth= Int32.MinValue;
+            public long MinHealth = long.MaxValue;
+            public long MaxHealth= long.MinValue;
             public Node Root;
           
             public static Input FromReadLine()
@@ -85,8 +98,8 @@ namespace compare_the_triplets.DeterminingDnaHealth
                     input.MinHealth = Math.Min(health, input.MinHealth);
                 }
 
-                input.MinHealth = input.MinHealth == int.MaxValue ? input.MaxHealth : input.MinHealth;
-                input.MaxHealth = input.MaxHealth == int.MinValue ? input.MinHealth : input.MaxHealth;
+                input.MinHealth = input.MinHealth == long.MaxValue ? input.MaxHealth : input.MinHealth;
+                input.MaxHealth = input.MaxHealth == long.MinValue ? input.MinHealth : input.MaxHealth;
                 return input;
             }
 
