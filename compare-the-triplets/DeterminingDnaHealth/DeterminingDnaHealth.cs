@@ -14,9 +14,13 @@ namespace compare_the_triplets.DeterminingDnaHealth
         public class Node
         {
             public string Value;
-            public Dictionary<char, Node> Children;// = new Dictionary<char, Node>();
+            public Node[] Children;
+            //public Dictionary<char, Node> Children;// = new Dictionary<char, Node>();
             public List<int> Idxs;// = new List<int>();
         }
+
+        public const int CharA = 97;
+        
 
         public static Node SearchTree(Node node, string searchText, int depth = 0)
         {
@@ -24,7 +28,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
             if (node.Value == searchText) return node;
             if (depth == searchText.Length)
             {
-                if (node.Children.Any())
+                if (node.Children!=null)
                 {
                     //adding to searchText may get match
                     return node;
@@ -32,13 +36,21 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 //adding to searchText with not get match
                 return null;
             }
-            var nextChar = searchText[depth];
-            if (node.Children == null || !node.Children.ContainsKey(nextChar))
+
+            var nextCharIdx = searchText[depth] - CharA;
+            
+            if (node.Children == null )
             {
                 return null;
             }
 
-            return SearchTree(node.Children[nextChar], searchText, depth+1);
+            var child = node.Children[nextCharIdx];
+            if (child == null)
+            {
+                return null;
+            }
+
+            return SearchTree(child, searchText, depth+1);
         }
 
         public static Node BuildTree(string[] genes, int[] healthVals)
@@ -54,17 +66,17 @@ namespace compare_the_triplets.DeterminingDnaHealth
 
         private static void BuildTree2(Node node, int depth, string gene, int idx)
         {
-            var nextChar = gene[depth];
+            var nextCharIdx = gene[depth] - CharA;
             if (node.Children == null)
             {
-                node.Children = new Dictionary<char, Node>();
-                node.Children.Add(nextChar, new Node());
+                node.Children = new Node[26];
+                node.Children[nextCharIdx] = new Node();
             }
-            else if (!node.Children.ContainsKey(nextChar))
+            else if (node.Children[nextCharIdx]==null)
             {
-                node.Children.Add(nextChar,new  Node() );
+                node.Children[nextCharIdx] = new Node();
             }
-            var child = node.Children[nextChar];
+            var child = node.Children[nextCharIdx];
             if (depth + 1 == gene.Length)
             {
                 if (child.Idxs == null)
@@ -104,15 +116,16 @@ namespace compare_the_triplets.DeterminingDnaHealth
             }
 
 
-            
+
 
             // iteration #1 3.5s per 100
             // iteration #2 1.8s per 100
             // iteration #3 0.1s per 100
             // iteration #5 0.025s per 100
             // iteration #6 0.01s per 100
+            // iteration #7 0.008 per 100
 
-            
+
             static Input ReadHeader()
             {
                 var geneCount = Convert.ToInt32(Console.ReadLine());
