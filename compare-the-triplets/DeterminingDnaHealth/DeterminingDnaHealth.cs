@@ -10,17 +10,16 @@ namespace compare_the_triplets.DeterminingDnaHealth
 {
     public class DeterminingDnaHealth
     {
-        
+
         public class Node
         {
             public string Value;
             public Node[] Children;
-            //public Dictionary<char, Node> Children;// = new Dictionary<char, Node>();
             public List<int> Idxs;// = new List<int>();
         }
 
         public const int CharA = 97;
-        
+
 
         public static Node SearchTree(Node node, string searchText, int depth = 0)
         {
@@ -28,7 +27,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
             if (node.Value == searchText) return node;
             if (depth == searchText.Length)
             {
-                if (node.Children!=null)
+                if (node.Children != null)
                 {
                     //adding to searchText may get match
                     return node;
@@ -38,8 +37,8 @@ namespace compare_the_triplets.DeterminingDnaHealth
             }
 
             var nextCharIdx = searchText[depth] - CharA;
-            
-            if (node.Children == null )
+
+            if (node.Children == null)
             {
                 return null;
             }
@@ -50,7 +49,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 return null;
             }
 
-            return SearchTree(child, searchText, depth+1);
+            return SearchTree(child, searchText, depth + 1);
         }
 
         public static Node BuildTree(string[] genes, int[] healthVals)
@@ -72,7 +71,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 node.Children = new Node[26];
                 node.Children[nextCharIdx] = new Node();
             }
-            else if (node.Children[nextCharIdx]==null)
+            else if (node.Children[nextCharIdx] == null)
             {
                 node.Children[nextCharIdx] = new Node();
             }
@@ -81,14 +80,14 @@ namespace compare_the_triplets.DeterminingDnaHealth
             {
                 if (child.Idxs == null)
                 {
-                    child.Idxs=new List<int>();
+                    child.Idxs = new List<int>();
                 }
                 child.Value = gene;
                 child.Idxs.Add(idx);
                 return;
             }
 
-            BuildTree2(child, depth + 1, gene,  idx);
+            BuildTree2(child, depth + 1, gene, idx);
         }
 
         public class Input
@@ -97,14 +96,14 @@ namespace compare_the_triplets.DeterminingDnaHealth
             public int[] HeathVals;
             public int DnaCount;
             public long MinHealth = long.MaxValue;
-            public long MaxHealth= long.MinValue;
+            public long MaxHealth = long.MinValue;
             public Node Root;
-          
+
             public static Input FromReadLine()
             {
                 var input = ReadHeader();
                 for (int i = 0; i < input.DnaCount; i++)
-                {                    
+                {
                     var health = input.ProcessDnaLine(Console.ReadLine());
                     input.MaxHealth = Math.Max(health, input.MaxHealth);
                     input.MinHealth = Math.Min(health, input.MinHealth);
@@ -132,7 +131,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 var genes = Console.ReadLine().Split(' ');
                 var heathVals = Array.ConvertAll(Console.ReadLine().Split(' '), healthTemp => Convert.ToInt32(healthTemp));
                 int dnaCount = Convert.ToInt32(Console.ReadLine());
-                
+
                 var treeRoot = BuildTree(genes, heathVals);
                 return new Input { DnaCount = dnaCount, Genes = genes, HeathVals = heathVals, Root = treeRoot };
             }
@@ -148,7 +147,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 //var t0 = sw.Elapsed;
                 for (int i = 0; i < dna.Length; i++)
                 {
-                    for (int j = 1; j <= dna.Length - i; j++)
+                    for (int j = 1; j < dna.Length - i + 1; j++)
                     {
                         var searchText = dna.Substring(i, j);
                         var node = SearchTree(Root, searchText);
