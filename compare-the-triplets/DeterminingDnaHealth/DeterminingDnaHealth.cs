@@ -16,42 +16,27 @@ namespace compare_the_triplets.DeterminingDnaHealth
             public bool IsToken;
             public Node[] Children;
             public List<int> Idxs;// = new List<int>();
+
+            public long GetHeath(int first, int last, int[] heathVals)
+            {
+                if (Idxs == null)
+                    return 0;
+                long health = 0;                
+                for (int k = 0; k < Idxs.Count; k++)
+                {
+                    var idx = Idxs[k];
+                    if (idx < first || idx > last)
+                        continue;
+                    health += heathVals[idx];
+                }
+                return health;
+            }
         }
 
         public const int CharA = 97;
 
 
-        public static Node SearchTree(Node node, string searchText, int depth = 0)
-        {
-            if (depth == searchText.Length)
-            {
-                //exact match
-                if (node.IsToken)
-                    return node;
-                if (node.Children != null)
-                {
-                    //adding to searchText may get match
-                    return node;
-                }
-                //adding to searchText with not get match
-                return null;
-            }
-
-            var nextCharIdx = searchText[depth] - CharA;
-
-            if (node.Children == null)
-            {
-                return null;
-            }
-
-            var child = node.Children[nextCharIdx];
-            if (child == null)
-            {
-                return null;
-            }
-
-            return SearchTree(child, searchText, depth + 1);
-        }
+        
 
         public static Node BuildTree(string[] genes, int[] healthVals)
         {
@@ -138,40 +123,40 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 return new Input { DnaCount = dnaCount, Genes = genes, HeathVals = heathVals, Root = treeRoot };
             }
 
+            public long SearchTree(Node node, string dna, int dnaStartIdx, int dnaLength, long prevScore, int healthFirst, int healthLast)
+            {
+                var currScore = node.GetHeath(healthFirst, healthLast, this.HeathVals);
+                if (dnaStartIdx + dnaLength > dna.Length)
+                {
+                    return currScore + prevScore;
+                }
+                if (node.Children == null)
+                {
+                    return currScore+prevScore;
+                }
+                var nextCharIdx = dna[dnaStartIdx + dnaLength - 1] - CharA;
+                var child = node.Children[nextCharIdx];
+                if (child == null)
+                {
+                    return currScore+prevScore;
+                }
+                return SearchTree(child, dna, dnaStartIdx, dnaLength + 1, currScore + prevScore, healthFirst,
+                    healthLast);
+            }
+
             public long ProcessDnaLine(string s)
             {
                 //var sw = Stopwatch.StartNew();
                 string[] splits = s.Split(' ');
-                long first = long.Parse(splits[0]);
-                long last = long.Parse(splits[1]);
+                int first = int.Parse(splits[0]);
+                int last = int.Parse(splits[1]);
                 string dna = splits[2];
                 long healthSum = 0;
                 //var t0 = sw.Elapsed;
                 for (int i = 0; i < dna.Length; i++)
                 {
-                    for (int j = 1; j < dna.Length - i + 1; j++)
-                    {
-                        var searchText = dna.Substring(i, j);
-                        var node = SearchTree(Root, searchText);
-                        if (node == null)
-                        {
-                            break;
-                        }
-
-                        if (node.IsToken)
-                        {
-                            long health = 0;
-                            for (int k = 0; k < node.Idxs.Count; k++)
-                            {
-                                var idx = node.Idxs[k];
-                                if (idx < first || idx > last)
-                                    continue;
-                                health += HeathVals[idx];
-                            }
-                            healthSum += health;
-                        }
-
-                    }
+                    var heath = SearchTree(Root, dna, i, 1, 0, first, last);
+                    healthSum += heath;                    
                 }
 
                 //var t1 = sw.Elapsed - t0;
