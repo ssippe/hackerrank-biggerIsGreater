@@ -13,7 +13,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
 
         public class Node
         {
-            public string Value;
+            public bool IsToken;
             public Node[] Children;
             public List<int> Idxs;// = new List<int>();
         }
@@ -23,10 +23,11 @@ namespace compare_the_triplets.DeterminingDnaHealth
 
         public static Node SearchTree(Node node, string searchText, int depth = 0)
         {
-            //exact match
-            if (node.Value == searchText) return node;
             if (depth == searchText.Length)
             {
+                //exact match
+                if (node.IsToken)
+                    return node;
                 if (node.Children != null)
                 {
                     //adding to searchText may get match
@@ -82,7 +83,8 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 {
                     child.Idxs = new List<int>();
                 }
-                child.Value = gene;
+
+                child.IsToken = true;
                 child.Idxs.Add(idx);
                 return;
             }
@@ -156,7 +158,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
                             break;
                         }
 
-                        if (node.Value == searchText)
+                        if (node.IsToken)
                         {
                             long health = 0;
                             for (int k = 0; k < node.Idxs.Count; k++)
