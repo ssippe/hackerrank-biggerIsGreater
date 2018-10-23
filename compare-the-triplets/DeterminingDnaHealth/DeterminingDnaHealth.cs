@@ -123,25 +123,37 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 return new Input { DnaCount = dnaCount, Genes = genes, HeathVals = heathVals, Root = treeRoot };
             }
 
-            public long SearchTree(Node node, string dna, int dnaStartIdx, int dnaLength, long prevScore, int healthFirst, int healthLast)
+            public long SearchTree(string dna, int dnaStartIdx, int healthFirst, int healthLast)
             {
-                var currScore = node.GetHeath(healthFirst, healthLast, this.HeathVals);
-                if (dnaStartIdx + dnaLength > dna.Length)
+                var node = Root;
+                long score = 0;
+                var dnaLength = 1;
+                while (true)
                 {
-                    return currScore + prevScore;
+                    var currScore = node.GetHeath(healthFirst, healthLast, this.HeathVals);
+                    score += currScore;
+                    if (dnaStartIdx + dnaLength > dna.Length)
+                    {
+                        return score;
+                    }
+
+                    if (node.Children == null)
+                    {
+                        return score;
+                    }
+
+                    var nextCharIdx = dna[dnaStartIdx + dnaLength - 1] - CharA;
+                    var child = node.Children[nextCharIdx];
+                    if (child == null)
+                    {
+                        return score;
+                    }
+
+                    node = child;
+                    dnaLength += 1;
+                    //return SearchTree(child, dna, dnaStartIdx, dnaLength + 1, currScore + prevScore, healthFirst,
+                    //    healthLast);
                 }
-                if (node.Children == null)
-                {
-                    return currScore+prevScore;
-                }
-                var nextCharIdx = dna[dnaStartIdx + dnaLength - 1] - CharA;
-                var child = node.Children[nextCharIdx];
-                if (child == null)
-                {
-                    return currScore+prevScore;
-                }
-                return SearchTree(child, dna, dnaStartIdx, dnaLength + 1, currScore + prevScore, healthFirst,
-                    healthLast);
             }
 
             public long ProcessDnaLine(string s)
@@ -155,7 +167,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 //var t0 = sw.Elapsed;
                 for (int i = 0; i < dna.Length; i++)
                 {
-                    var heath = SearchTree(Root, dna, i, 1, 0, first, last);
+                    var heath = SearchTree(dna, i, first, last);
                     healthSum += heath;                    
                 }
 
