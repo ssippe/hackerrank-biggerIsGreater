@@ -15,19 +15,20 @@ namespace compare_the_triplets.DeterminingDnaHealth
         {
             public bool IsToken;
             public Node[] Children;
-            public List<int> Idxs;// = new List<int>();
+            public int[] Idxs;// = new List<int>();
+            public int[] HealthVals;
 
-            public long GetHeath(int first, int last, int[] heathVals)
+            public long GetHeath(int first, int last)
             {
                 if (Idxs == null)
                     return 0;
-                long health = 0;                
-                for (int k = 0; k < Idxs.Count; k++)
+                long health = 0;
+                for (int k = 0; k < Idxs.Length; k++)
                 {
                     var idx = Idxs[k];
                     if (idx < first || idx > last)
                         continue;
-                    health += heathVals[idx];
+                    health += HealthVals[k];
                 }
                 return health;
             }
@@ -36,20 +37,20 @@ namespace compare_the_triplets.DeterminingDnaHealth
         public const int CharA = 97;
 
 
-        
+
 
         public static Node BuildTree(string[] genes, int[] healthVals)
         {
             var root = new Node();
             for (int i = 0; i < genes.Length; i++)
             {
-                BuildTree2(root, 0, genes[i], i);
+                BuildTree2(root, 0, genes[i], i, healthVals[i]);
             }
 
             return root;
         }
 
-        private static void BuildTree2(Node node, int depth, string gene, int idx)
+        private static void BuildTree2(Node node, int depth, string gene, int idx, int healthVal)
         {
             var nextCharIdx = gene[depth] - CharA;
             if (node.Children == null)
@@ -66,15 +67,17 @@ namespace compare_the_triplets.DeterminingDnaHealth
             {
                 if (child.Idxs == null)
                 {
-                    child.Idxs = new List<int>();
+                    child.Idxs = new int[] { };
+                    child.HealthVals = new int[] { };
                 }
 
                 child.IsToken = true;
-                child.Idxs.Add(idx);
+                child.Idxs = child.Idxs.Concat(new[] { idx }).ToArray();
+                child.HealthVals = child.HealthVals.Concat(new[] { healthVal }).ToArray();
                 return;
             }
 
-            BuildTree2(child, depth + 1, gene, idx);
+            BuildTree2(child, depth + 1, gene, idx, healthVal);
         }
 
         public class Input
@@ -130,7 +133,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 var dnaLength = 1;
                 while (true)
                 {
-                    var currScore = node.GetHeath(healthFirst, healthLast, this.HeathVals);
+                    var currScore = node.GetHeath(healthFirst, healthLast);
                     score += currScore;
                     if (dnaStartIdx + dnaLength > dna.Length)
                     {
@@ -168,7 +171,7 @@ namespace compare_the_triplets.DeterminingDnaHealth
                 for (int i = 0; i < dna.Length; i++)
                 {
                     var heath = SearchTree(dna, i, first, last);
-                    healthSum += heath;                    
+                    healthSum += heath;
                 }
 
                 //var t1 = sw.Elapsed - t0;
